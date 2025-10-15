@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shop | FoxPanel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="static/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <!-- (Optional) reuse your navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black py-3">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center fw-bold text-orange" href="index.html">
+        <img src="static/images/favicon.png" alt="Logo" width="25" height="25" class="me-2"> FoxPanel
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navShop">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navShop">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link active" href="shop.html">Shop</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Gallery</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Choices -->
+  <section class="shop-choices">
+    <div class="container">
+      <h2 class="text-center fw-bold text-orange mb-4">What do you want to add?</h2>
+
+      <div class="row g-4 justify-content-center">
+        <!-- Fox Panel -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <a class="option-card" href="category-foxpanel.html">
+            <div class="option-thumb">
+              <img src="static/images/main-bg.png" alt="Fox Panel" class="img-fluid">
+            </div>
+            <div class="option-title">Fox Panel</div>
+          </a>
+        </div>
+
+        <!-- Fox Tile -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <a class="option-card" href="category-foxtile.html">
+            <div class="option-thumb">
+              <img src="static/images/picture-tile.jpg" alt="Fox Tile" class="img-fluid">
+            </div>
+            <div class="option-title">Fox Tile</div>
+          </a>
+        </div>
+
+        <!-- Canvas / FoxWrap -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <a class="option-card" href="category-foxwrap.html">
+            <div class="option-thumb">
+              <img src="static/images/pexels-prismattco-2372982.jpg" alt="Canvas / FoxWrap" class="img-fluid">
+            </div>
+            <div class="option-title">Canvas / FoxWrap</div>
+          </a>
+        </div>
+
+        <!-- Fox Echo / Gallery Walls -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <a class="option-card" href="category-foxecho.html">
+            <div class="option-thumb">
+              <img src="static/images/pexels-pixabay-276583.jpg" alt="Fox Echo" class="img-fluid">
+            </div>
+            <div class="option-title">Fox Echo</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- (Optional) reuse your footer -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

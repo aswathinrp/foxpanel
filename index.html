@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoxPanel | Beautiful Photo Frames</title>
+
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="static/css/style.css">
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black py-3">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center fw-bold text-orange" href="index.html">
+        <img src="static/images/favicon.png" alt="Logo" width="25" height="25" class="me-2">
+        FoxPanel
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+  <ul class="navbar-nav align-items-lg-center">
+    <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+    <li class="nav-item"><a class="nav-link" href="#">Shop</a></li>
+    <li class="nav-item"><a class="nav-link" href="#">Gallery</a></li>
+    <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+  </ul>
+
+  <!-- Auth buttons -->
+  <div class="d-flex align-items-center gap-2 ms-lg-3 mt-3 mt-lg-0">
+    <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#loginModal">
+      Login
+    </button>
+    <button class="btn btn-orange btn-sm" data-bs-toggle="modal" data-bs-target="#signupModal">
+      Sign Up
+    </button>
+  </div>
+</div>
+    </div>
+  </nav>
+
+  <!-- Hero / Banner Section -->
+<section class="banner-section d-flex align-items-center justify-content-center text-center text-white"
+  style="background: url('static/images/pexels-charlotte-may-5825423.jpg') center/cover no-repeat; height: 100vh;">
+  
+  <div class="bg-dark bg-opacity-50 p-4 rounded">
+    <h1 class="fw-bold display-4">Beautiful Frames for Your Memories</h1>
+    <p class="lead">Custom photo frames crafted with love and precision.</p>
+    <a href="shop.html" class="btn btn-orange btn-lg mt-3">Shop Now</a>
+  </div>
+</section>
+
+<!-- Top Categories -->
+<section class="top-categories-section">
+  <div class="container">
+    <div class="categories-slab shadow-lg rounded-4 p-4 p-md-5 bg-white">
+      <h2 class="text-center fw-bold mb-4 mb-md-5 text-orange">Top Categories</h2>
+
+      <div class="row g-4 g-md-5 justify-content-center">
+        <!-- Card 1 -->
+        <div class="col-10 col-sm-6 col-lg-4">
+          <a href="#" class="category-card text-decoration-none d-block h-100">
+            <div class="icon-wrap mx-auto mb-3">
+              <i class="bi bi-image"></i>
+            </div>
+            <h5 class="text-center fw-semibold mb-1 text-dark">Frame Your Photos</h5>
+            <p class="text-center text-muted small mb-0">Glossy handmade panels. No nails needed.</p>
+          </a>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="col-10 col-sm-6 col-lg-4">
+          <a href="#" class="category-card text-decoration-none d-block h-100">
+            <div class="icon-wrap mx-auto mb-3">
+              <i class="bi bi-grid-3x3-gap"></i>
+            </div>
+            <h5 class="text-center fw-semibold mb-1 text-dark">Gallery Walls</h5>
+            <p class="text-center text-muted small mb-0">Pre-designed sets for modern walls.</p>
+          </a>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="col-10 col-sm-6 col-lg-4">
+          <a href="#" class="category-card text-decoration-none d-block h-100">
+            <div class="icon-wrap mx-auto mb-3">
+              <i class="bi bi-easel2"></i>
+            </div>
+            <h5 class="text-center fw-semibold mb-1 text-dark">Art Collection</h5>
+            <p class="text-center text-muted small mb-0">Curated prints & premium canvases.</p>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- What is FoxPanel -->
+<section class="section-what-is">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <!-- Copy -->
+      <div class="col-lg-6">
+        <span class="eyebrow text-orange">About</span>
+        <h2 class="display-6 fw-bold mb-3">What is FoxPanel?</h2>
+        <p class="lead mb-3">
+          <strong>FoxPanel</strong> is the ultimate solution for turning your most cherished photos into
+          timeless, high-quality <em>handmade photo panels</em>. Each piece is crafted with precision,
+          featuring a glossy, durable finish and our signature <strong>no-nails</strong> sticker mounting—so
+          you can install in seconds without damaging your walls.
+        </p>
+        <p class="mb-4">
+          Upload your pictures, choose the size and style, preview instantly, and get them delivered to your
+          doorstep. From single hero shots to elegant gallery walls, FoxPanel makes your memories look museum-ready.
+        </p>
+
+        <ul class="list-unstyled feature-list mb-4">
+          <li><i class="bi bi-check2-circle"></i> Handmade finish with premium lamination</li>
+          <li><i class="bi bi-check2-circle"></i> 1.5&nbsp;cm depth, lightweight & ready to stick</li>
+          <li><i class="bi bi-check2-circle"></i> Clean, borderless look—no frames required</li>
+          <li><i class="bi bi-check2-circle"></i> Free delivery on bulk orders across UAE</li>
+        </ul>
+
+        <a href="shop.html" class="btn btn-orange btn-lg">Create Your Panel</a>
+      </div>
+
+      <!-- Images -->
+      <div class="col-lg-6">
+        <div class="mockup-stack mx-auto">
+          <!-- Large framed print -->
+          <img
+            src="static/images/image3.jpg"
+            alt="Large FoxPanel on wall"
+            class="img-fluid shadow-soft rounded-4 base-img">
+          <!-- Phone preview overlapping -->
+          <img
+            src="static/images/image2.jpg"
+            alt="Mobile preview of FoxPanel photo"
+            class="img-fluid shadow-soft rounded-4 phone-img">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Magnetic Hanging (text + video) -->
+<section class="section-magnetic">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <!-- Text -->
+      <div class="col-lg-5">
+        <h2 class="display-6 fw-bold mb-4">Meet Magnetic<br>Hanging</h2>
+
+        <ul class="mag-list">
+          <li class="done">Just peel and stick</li>
+          <li class="done">Adjust to perfection</li>
+          <li class="active">Leaves no marks</li>
+        </ul>
+
+        <p class="text-muted mt-3">
+          Our restickable magnetic mounting makes arranging gallery walls effortless—no drills,
+          no damage. Perfect for renters and clean design lovers.
+        </p>
+      </div>
+
+      <!-- Video -->
+      <div class="col-lg-7">
+        <div class="video-frame shadow-deep rounded-5 overflow-hidden">
+          <video class="w-100 h-100 object-cover" autoplay muted loop playsinline
+                 poster="static/images/panel.jpg">
+            <source src="static/images/videofox.mp4" type="video/mp4">
+            <!-- Fallback -->
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="video-glow"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- We've Got You Covered -->
+<section class="section-covered">
+  <div class="container">
+    <h2 class="text-center fw-bold display-6 mb-5">We’ve Got You Covered</h2>
+
+    <div class="row g-4 g-lg-5">
+      <!-- Card 1 -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="covered-card">
+          <div class="covered-illus">
+            <!-- Replace with your SVG/PNG if you like -->
+            <i class="bi bi-box-seam"></i>
+          </div>
+          <h5 class="fw-semibold mb-1">Fast & Free Shipping</h5>
+          <p class="text-muted small mb-0">*Free shipping over AED&nbsp;59</p>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="covered-card">
+          <div class="covered-illus">
+            <i class="bi bi-star-fill"></i>
+          </div>
+          <h5 class="fw-semibold mb-1">Rated 4.9/5</h5>
+          <p class="text-muted small mb-0">120k+ happy customers</p>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="covered-card">
+          <div class="covered-illus">
+            <i class="bi bi-emoji-smile"></i>
+          </div>
+          <h5 class="fw-semibold mb-1">Satisfaction Guaranteed</h5>
+          <p class="text-muted small mb-0">Not satisfied? Get a full refund</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+  <footer class="site-footer">
+  <div class="container py-5 py-lg-6 position-relative">
+    <div class="row g-4 g-lg-5">
+      <!-- Brand / About -->
+      <div class="col-lg-4">
+        <img
+    src="static/images/creative-fox.png"   
+    alt="FoxPanel logo"
+    class="footer-logo mb-2">
+    
+            <h3 class="footer-brand mb-2">FoxPanel<span class="tm">™</span></h3>
+        <p class="mb-3 text-footer">
+          We turn your most cherished memories into glossy, handmade photo panels.
+          Lightweight, borderless, and ready to stick—no nails, no hassle.
+        </p>
+        <p class="small-addr mb-0 text-footer">
+          Dubai • UAE &nbsp;|&nbsp; <a class="link-light-weak" href="mailto:hello@foxpanel.shop">hello@foxpanel.shop</a>
+        </p>
+      </div>
+
+      <!-- Products -->
+      <div class="col-6 col-lg-2">
+        <h6 class="footer-head">Our Products</h6>
+        <ul class="list-unstyled footer-links">
+          <li><a href="#">Photo Panels</a></li>
+          <li><a href="#">Gallery Wall Sets</a></li>
+          <li><a href="#">Canvas Wraps</a></li>
+          <li><a href="#">Foxy Frames</a></li>
+        </ul>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="col-6 col-lg-2">
+        <h6 class="footer-head">Quick Links</h6>
+        <ul class="list-unstyled footer-links">
+          <li><a href="#">My Account</a></li>
+          <li><a href="#">Shipping & Delivery</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Contact Us</a></li>
+          <li><a href="#">Blogs</a></li>
+        </ul>
+      </div>
+
+      <!-- Newsletter -->
+      <div class="col-lg-4">
+        <h6 class="footer-head">Newsletter Sign Up</h6>
+        <p class="text-footer mb-3">Get updates on new products, sales, and offers.</p>
+
+        <form class="newsletter-form d-flex">
+          <input type="email" class="form-control footer-input me-2" placeholder="Email address" required>
+          <button class="btn btn-orange px-3" type="submit" aria-label="Subscribe">
+            <i class="bi bi-envelope-fill"></i>
+          </button>
+        </form>
+
+        <div class="social mt-3 d-flex align-items-center gap-2">
+          <a class="social-btn" href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+          <a class="social-btn" href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          <a class="social-btn" href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+          <a class="social-btn" href="#" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <hr class="footer-hr my-4">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 small">
+      <span class="text-footer">© 2025 FoxPanel. All rights reserved.</span>
+      <ul class="list-inline mb-0">
+        <li class="list-inline-item"><a href="#" class="link-light-weak">Terms</a></li>
+        <li class="list-inline-item">•</li>
+        <li class="list-inline-item"><a href="#" class="link-light-weak">Refund Policy</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold">Welcome back</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form class="needs-validation" novalidate>
+        <div class="modal-body pt-0">
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" placeholder="you@example.com" required>
+            <div class="invalid-feedback">Please enter a valid email.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-control" placeholder="••••••••" required minlength="6">
+            <div class="invalid-feedback">Password must be at least 6 characters.</div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="rememberMe">
+              <label class="form-check-label" for="rememberMe">Remember me</label>
+            </div>
+            <a href="#" class="small text-decoration-none">Forgot password?</a>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="submit" class="btn btn-orange w-100">Login</button>
+        </div>
+        <div class="text-center pb-3">
+          <span class="small">New here?</span>
+          <a href="#" class="small text-orange text-decoration-none" data-bs-target="#signupModal" data-bs-toggle="modal" data-bs-dismiss="modal">Create an account</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Sign Up Modal -->
+<div class="modal fade" id="signupModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold">Create your account</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form class="needs-validation" novalidate>
+        <div class="modal-body pt-0">
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label class="form-label">First name</label>
+              <input type="text" class="form-control" required>
+              <div class="invalid-feedback">First name required.</div>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Last name</label>
+              <input type="text" class="form-control" required>
+              <div class="invalid-feedback">Last name required.</div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" placeholder="you@example.com" required>
+              <div class="invalid-feedback">Valid email required.</div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-control" placeholder="Minimum 6 characters" required minlength="6">
+              <div class="invalid-feedback">Password must be at least 6 characters.</div>
+            </div>
+            <div class="col-12">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="terms" required>
+                <label class="form-check-label" for="terms">
+                  I agree to the <a href="#" class="text-decoration-none">Terms & Privacy</a>
+                </label>
+                <div class="invalid-feedback">You must agree before submitting.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="submit" class="btn btn-orange w-100">Create Account</button>
+        </div>
+        <div class="text-center pb-3">
+          <span class="small">Already have an account?</span>
+          <a href="#" class="small text-orange text-decoration-none" data-bs-target="#loginModal" data-bs-toggle="modal" data-bs-dismiss="modal">Login</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

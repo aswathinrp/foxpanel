@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Single Frame | FoxPanel (Multi)</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+  :root{
+    --brand:#ff7b00;
+    --frame-black:#111;
+    --frame-brown:#5b3b26;
+    --frame-wood:#b78952;
+  }
+  body{ background:#eef3f5; }
+  .topbar{ background:#111; color:#fff; }
+  .btn-brand{ background:var(--brand); color:#fff; border:0; }
+  .btn-brand:hover{ background:#e26f00; color:#fff; }
+
+  .sf-list{ max-width: 1100px; margin: 1.25rem auto; }
+  .sf-card{
+    background:#fff; border-radius: 1rem; border:1px solid rgba(0,0,0,.08);
+    box-shadow: 0 12px 30px rgba(0,0,0,.08);
+    padding: 1.25rem 1.25rem 1rem;
+  }
+
+  /* Preview area */
+  .frame-preview{
+    width: 360px; max-width: 90vw; margin: 0 auto 1rem;
+    position: relative;
+    aspect-ratio: 1/1; /* default 20x20 */
+    display: grid; place-items: center;
+    background:#f3f3f3;
+    border-radius: .5rem;
+  }
+  /* printed border (frame) */
+  .frame-preview::before{
+    content:""; position:absolute; inset:0; border-radius:.5rem;
+    border: 16px solid var(--frame-brown); /* default */
+    pointer-events:none;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+  }
+  .frame-black::before{ border-color: var(--frame-black); }
+  .frame-brown::before{ border-color: var(--frame-brown); }
+  .frame-wood::before{  border-color: var(--frame-wood);  }
+  .frame-noborder::before{ border-width:0; }
+
+  /* inner border (mat) */
+  .inner-border-1::after,
+  .inner-border-2::after{
+    content:""; position:absolute; inset: 22px;
+    border-radius:.3rem; background:#fff; pointer-events:none;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);
+  }
+  .inner-border-2::after{ inset: 34px; }
+
+  .img-area{ position:absolute; inset: 18px; border-radius:.35rem; overflow:hidden; }
+  .inner-border-1 .img-area{ inset: 30px; }
+  .inner-border-2 .img-area{ inset: 42px; }
+  .img-layer{
+    position:absolute; inset:0;
+    background-position:center; background-repeat:no-repeat; background-size:cover;
+    transform-origin:center;
+    cursor: grab;
+  }
+  .img-layer:active{ cursor: grabbing; }
+
+  .upload-hint{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    color:#8a8a8a; font-weight:600; font-size:.95rem;
+    background: repeating-linear-gradient(45deg, #f7f7f7 0 10px, #f3f3f3 10px 20px);
+  }
+
+  .control-row{ gap:.75rem; }
+  .control-row .form-select{ min-width: 10.5rem; }
+
+  .sf-actions .btn{ min-width: 160px; }
+
+  /* Cart modal thumbs */
+  .cart-thumb{
+    width: 80px; height: 80px; object-fit: cover; border-radius: .4rem;
+    border:1px solid rgba(0,0,0,.08);
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container py-2 d-flex justify-content-between align-items-center">
+    <strong>Fox Panel</strong>
+    <div class="d-flex gap-2">
+      <button class="btn btn-sm btn-outline-light" id="openCart">
+        <i class="bi bi-bag"></i> Cart <span id="cartCount" class="badge bg-warning text-dark ms-1">0</span>
+      </button>
+      <a class="btn btn-sm btn-outline-light" href="shop.html">Back to Shop</a>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <h4 class="m-0" style="color:var(--brand)">Single Frame</h4>
+    <div class="d-flex gap-2">
+      <button id="addFrame" class="btn btn-brand"><i class="bi bi-plus-lg"></i> Add Another Frame</button>
+      <button id="downloadAll" class="btn btn-outline-secondary"><i class="bi bi-download"></i> Download All</button>
+    </div>
+  </div>
+
+  <div id="sfList" class="sf-list row g-4">
+    <!-- cards will be injected here -->
+  </div>
+</main>
+
+<!-- Cart Modal -->
+<div class="modal fade" id="cartModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-bag"></i> Your Cart</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="cartItems" class="vstack gap-3"></div>
+        <div id="cartEmpty" class="text-center text-muted py-4">Your cart is empty.</div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <div class="fw-bold">Total: AED <span id="cartTotal">0</span></div>
+        <div class="d-flex gap-2">
+          <button id="clearCart" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Clear</button>
+          <button id="cartCheckout" class="btn btn-brand"><i class="bi bi-credit-card"></i> Confirm & Pay</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // ===== Pricing =====
+  const getPrice = (size) => (size === '20x20' ? 10 : 15); // AED
+
+  // State maps: id -> file/options for editor cards
+  const FRAMES = new Map(); // id -> {file, size, printed, inner, scale, offX, offY, price}
+
+  // Simple cart store (array of items)
+  // item: { id, name, size, printed, inner, price, url (thumb), blob }
+  const CART = [];
+
+  // Utilities
+  const el = (t,c='') => { const e=document.createElement(t); if(c) e.className=c; return e; };
+
+  const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+  document.getElementById('openCart').addEventListener('click', ()=> cartModal.show());
+
+  // Add first card on load
+  addCard();
+
+  document.getElementById('addFrame').addEventListener('click', ()=> addCard());
+
+  document.getElementById('downloadAll').addEventListener('click', async ()=>{
+    const ids = Array.from(FRAMES.keys());
+    if (!ids.length){ alert('No frames yet.'); return; }
+    for (const id of ids){
+      const data = FRAMES.get(id);
+      if (!data.file) continue;
+      const blobFile = await renderCardToBlob(id);
+      triggerDownload(blobFile.blob, blobFile.name);
+    }
+    alert('All previews downloaded.');
+  });
+
+  // ---- Card factory
+  function addCard(){
+    const id = crypto.randomUUID ? crypto.randomUUID() : ('id_'+Date.now()+Math.random());
+    const list = document.getElementById('sfList');
+    const col = el('div','col-12 col-md-6');
+    col.dataset.id = id;
+
+    const card = el('div','sf-card');
+
+    // PREVIEW
+    const preview = el('div','frame-preview frame-brown');
+    preview.dataset.id = id;
+    const hint = el('div','upload-hint'); hint.textContent='Click to upload';
+    const imgArea = el('div','img-area');
+    const layer = el('div','img-layer');
+    imgArea.appendChild(layer);
+    preview.appendChild(hint);
+    preview.appendChild(imgArea);
+
+    const pickBtn = el('button','btn btn-sm btn-secondary position-absolute');
+    pickBtn.style.bottom='12px'; pickBtn.style.right='12px';
+    pickBtn.innerHTML = `<i class="bi bi-upload"></i> Upload`;
+    const file = el('input'); file.type='file'; file.accept='image/*'; file.hidden=true;
+
+    preview.appendChild(pickBtn); preview.appendChild(file);
+
+    // ZOOM
+    const zoomLabel = el('label','form-label mb-1'); zoomLabel.textContent='Pan / Zoom:';
+    const zoom = el('input','form-range mb-3'); zoom.type='range'; zoom.min='1'; zoom.max='3'; zoom.step='0.01'; zoom.value='1';
+
+    // CONTROLS
+    const controls = el('div','d-flex flex-wrap control-row');
+    const sizeWrap = el('div'); const printedWrap = el('div'); const innerWrap = el('div');
+
+    sizeWrap.innerHTML = `
+      <label class="form-label small mb-1">Size</label>
+      <select class="form-select form-select-sm sf-size">
+        <option value="20x20" selected>20×20 cm</option>
+        <option value="20x30">20×30 cm</option>
+        <option value="30x20">30×20 cm</option>
+      </select>
+    `;
+    printedWrap.innerHTML = `
+      <label class="form-label small mb-1">Printed border</label>
+      <select class="form-select form-select-sm sf-printed">
+        <option value="brown" selected>Wood</option>
+        <option value="black">Black</option>
+        <option value="wood">Oak</option>
+        <option value="none">No Border</option>
+      </select>
+    `;
+    innerWrap.innerHTML = `
+      <label class="form-label small mb-1">Inner border</label>
+      <select class="form-select form-select-sm sf-inner">
+        <option value="0" selected>No inner border</option>
+        <option value="1">1 cm inner border</option>
+        <option value="2">2 cm inner border</option>
+      </select>
+    `;
+    controls.append(sizeWrap, printedWrap, innerWrap);
+
+    // ACTIONS
+    const price = el('div','fw-semibold');
+    const btnDownload = el('button','btn btn-outline-secondary'); btnDownload.innerHTML = `<i class="bi bi-download"></i> Download Preview`;
+    const btnAdd = el('button','btn btn-brand'); btnAdd.innerHTML = `<i class="bi bi-cart-plus"></i> Add To Cart`;
+    const btnRemove = el('button','btn btn-outline-danger'); btnRemove.textContent = 'Remove';
+    const actions = el('div','sf-actions d-flex flex-wrap justify-content-between align-items-center mt-3');
+    const buttons = el('div','sf-btns d-flex flex-wrap gap-2');
+
+    buttons.append(btnDownload, btnAdd, btnRemove);
+    actions.append(price, buttons);
+
+    // Assemble card
+    card.append(preview, zoomLabel, zoom, controls, actions);
+    col.appendChild(card);
+    list.prepend(col);
+
+    // ---- State init + initial price
+    const initSize = '20x20';
+    const initPrice = getPrice(initSize);
+    FRAMES.set(id, { file:null, size:initSize, printed:'brown', inner:'0', scale:1, offX:0, offY:0, price:initPrice });
+    price.textContent = `Price : AED ${initPrice}`;
+
+    // --- Event wiring per card
+    pickBtn.addEventListener('click', ()=> file.click());
+    preview.addEventListener('click', (e)=>{
+      if (e.target === preview || e.target === imgArea) file.click();
+    });
+
+    file.addEventListener('change', (e)=>{
+      const f = e.target.files && e.target.files[0];
+      if(!f) return;
+      const reader = new FileReader();
+      reader.onload = ev=>{
+        layer.style.backgroundImage = `url('${ev.target.result}')`;
+        hint.style.display='none';
+        zoom.value='1';
+        const st = FRAMES.get(id);
+        st.file = f; st.scale = 1; st.offX = 0; st.offY = 0;
+        applyTransform(layer, st);
+      };
+      reader.readAsDataURL(f);
+      e.target.value='';
+    });
+
+    zoom.addEventListener('input', ()=>{
+      const state = FRAMES.get(id);
+      state.scale = parseFloat(zoom.value);
+      applyTransform(layer, state);
+    });
+
+    // Drag to pan
+    let drag=false, sx=0, sy=0, ox=0, oy=0;
+    imgArea.addEventListener('pointerdown', ev=>{
+      if (!layer.style.backgroundImage) return;
+      drag=true; imgArea.setPointerCapture(ev.pointerId);
+      sx=ev.clientX; sy=ev.clientY;
+      ox=FRAMES.get(id).offX; oy=FRAMES.get(id).offY;
+    });
+    imgArea.addEventListener('pointermove', ev=>{
+      if(!drag) return;
+      const state = FRAMES.get(id);
+      state.offX = ox + (ev.clientX - sx);
+      state.offY = oy + (ev.clientY - sy);
+      applyTransform(layer, state);
+    });
+    ['pointerup','pointerleave','pointercancel'].forEach(evt =>
+      imgArea.addEventListener(evt, ()=> drag=false));
+
+    // Size / Printed / Inner
+    const sizeSel = sizeWrap.querySelector('.sf-size');
+    const printedSel = printedWrap.querySelector('.sf-printed');
+    const innerSel = innerWrap.querySelector('.sf-inner');
+
+    sizeSel.addEventListener('change', ()=>{
+      const st = FRAMES.get(id);
+      st.size = sizeSel.value;
+      st.price = getPrice(st.size);
+      price.textContent = `Price : AED ${st.price}`;
+      preview.style.aspectRatio =
+        (st.size==='20x20') ? '1/1' :
+        (st.size==='20x30') ? '2/3' : '3/2';
+    });
+
+    printedSel.addEventListener('change', ()=>{
+      FRAMES.get(id).printed = printedSel.value;
+      setPrintedClass(preview, printedSel.value);
+    });
+    setPrintedClass(preview, 'brown');
+
+    innerSel.addEventListener('change', ()=>{
+      FRAMES.get(id).inner = innerSel.value;
+      setInnerClass(preview, innerSel.value);
+    });
+    setInnerClass(preview, '0');
+
+    // Actions
+    btnDownload.addEventListener('click', async ()=>{
+      const st = FRAMES.get(id);
+      if (!st.file){ alert('Upload a photo first.'); return; }
+      const out = await renderCardToBlob(id);
+      triggerDownload(out.blob, out.name);
+    });
+
+    btnAdd.addEventListener('click', async ()=>{
+      const st = FRAMES.get(id);
+      if (!st.file){ alert('Upload a photo first.'); return; }
+
+      // Render final image, create a temporary URL for thumbnail/display
+      const out = await renderCardToBlob(id);
+      const url = URL.createObjectURL(out.blob);
+
+      CART.push({
+        id: crypto.randomUUID ? crypto.randomUUID() : ('cart_'+Date.now()+Math.random()),
+        name: out.name,
+        size: st.size,
+        printed: st.printed,
+        inner: st.inner,
+        price: st.price,
+        url,            // object URL for <img>
+        blob: out.blob  // original blob (if you want to upload later)
+      });
+
+      refreshCartUI();
+      cartModal.show();
+    });
+
+    btnRemove.addEventListener('click', ()=>{
+      FRAMES.delete(id);
+      col.remove();
+    });
+  }
+
+  function applyTransform(layer, state){
+    layer.style.transform = `translate(${state.offX}px, ${state.offY}px) scale(${state.scale})`;
+  }
+
+  function setPrintedClass(preview, v){
+    preview.classList.remove('frame-black','frame-brown','frame-wood','frame-noborder');
+    if (v==='black') preview.classList.add('frame-black');
+    else if (v==='brown') preview.classList.add('frame-brown');
+    else if (v==='wood') preview.classList.add('frame-wood');
+    else preview.classList.add('frame-noborder');
+  }
+
+  function setInnerClass(preview, v){
+    preview.classList.remove('inner-border-0','inner-border-1','inner-border-2');
+    preview.classList.add('inner-border-' + v);
+  }
+
+  // Render one card to final cropped image (local)
+  async function renderCardToBlob(id){
+    const col = document.querySelector(`[data-id="${id}"]`);
+    const preview = col.querySelector('.frame-preview');
+    const imgArea = preview.querySelector('.img-area');
+    const layer = preview.querySelector('.img-layer');
+    const st = FRAMES.get(id);
+    const file = st.file;
+
+    const bitmap = await createImageBitmap(file);
+
+    const area = imgArea.getBoundingClientRect();
+    const outW = Math.max(900, Math.round(area.width * 2));
+    const outH = Math.max(900, Math.round(area.height * 2));
+    const cv = document.createElement('canvas'); cv.width=outW; cv.height=outH;
+    const ctx = cv.getContext('2d');
+    ctx.imageSmoothingQuality='high';
+
+    const baseScale = Math.max(outW/bitmap.width, outH/bitmap.height);
+    const sUser = st.scale || 1;
+    const offX = st.offX * (outW/area.width);
+    const offY = st.offY * (outH/area.height);
+
+    ctx.setTransform(baseScale * sUser, 0, 0, baseScale * sUser, outW/2 + offX, outH/2 + offY);
+    ctx.drawImage(bitmap, -bitmap.width/2, -bitmap.height/2);
+
+    return new Promise(resolve=>{
+      cv.toBlob(b=> resolve({ blob:b, name:`single_${st.size}_${st.printed}.jpg` }), 'image/jpeg', 0.92);
+    });
+  }
+
+  function triggerDownload(blob, name){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download=name;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // ---------- CART UI ----------
+  function refreshCartUI(){
+    const list = document.getElementById('cartItems');
+    const empty = document.getElementById('cartEmpty');
+    const totalEl = document.getElementById('cartTotal');
+    const countEl = document.getElementById('cartCount');
+
+    list.innerHTML = '';
+    let total = 0;
+
+    if (CART.length){
+      empty.style.display = 'none';
+      CART.forEach(item=>{
+        total += item.price;
+
+        const row = el('div','d-flex align-items-center justify-content-between border rounded p-2');
+        const left = el('div','d-flex align-items-center gap-3');
+        const img = new Image(); img.src = item.url; img.className = 'cart-thumb';
+        const meta = el('div');
+        meta.innerHTML = `
+          <div class="small text-muted">${item.name}</div>
+          <div><span class="badge text-bg-light">${item.size}</span>
+               <span class="badge text-bg-light">Frame: ${item.printed}</span>
+               <span class="badge text-bg-light">Inner: ${item.inner}</span></div>
+        `;
+        left.append(img, meta);
+
+        const right = el('div','d-flex align-items-center gap-3');
+        const price = el('div','fw-semibold'); price.textContent = `AED ${item.price}`;
+        const rm = el('button','btn btn-sm btn-outline-danger'); rm.innerHTML = '<i class="bi bi-x"></i>';
+        rm.addEventListener('click', ()=>{
+          // revoke URL to free memory
+          URL.revokeObjectURL(item.url);
+          const idx = CART.findIndex(x => x.id === item.id);
+          if (idx>-1) CART.splice(idx,1);
+          refreshCartUI();
+        });
+        right.append(price, rm);
+
+        row.append(left, right);
+        list.appendChild(row);
+      });
+    }else{
+      empty.style.display = '';
+    }
+
+    totalEl.textContent = total.toFixed(2);
+    countEl.textContent = CART.length;
+
+    // Clear / checkout handlers (bind once safely)
+    document.getElementById('clearCart').onclick = ()=>{
+      CART.forEach(it => URL.revokeObjectURL(it.url));
+      CART.length = 0;
+      refreshCartUI();
+    };
+
+    document.getElementById('cartCheckout').onclick = ()=>{
+      if (!CART.length) return;
+      const ok = confirm(`Confirm payment of AED ${total.toFixed(2)} for ${CART.length} item(s)?`);
+      if (ok){
+        // simulate success
+        alert('Payment successful (demo). Order placed!');
+        CART.forEach(it => URL.revokeObjectURL(it.url));
+        CART.length = 0;
+        refreshCartUI();
+        cartModal.hide();
+      }
+    };
+  }
+</script>
+</body>
+</html>
