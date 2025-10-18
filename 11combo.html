@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Fox Panel | Create</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+  :root{
+    --brand:#ff7b00;
+    --ink:#0f1216;
+    --muted:#6b757d;
+    --card:#ffffff;
+    --line:#e6e9ee;
+  }
+  html,body{ background:#f5f7f9; color:var(--ink); }
+
+  /* Topbar */
+  .topbar{ background:#111; color:#fff; }
+  .topbar a.brand{ color:#fff; text-decoration:none; font-weight:700; }
+  .btn-brand{ background:var(--brand); color:#fff; border:0; }
+  .btn-brand:hover{ background:#e26f00; color:#fff; }
+
+  /* Header copy */
+  .subtle{ color:var(--muted); }
+  .kbd{ border:1px solid rgba(0,0,0,.2); border-bottom-width:2px; border-radius:6px; padding:.12rem .35rem; font-weight:600; }
+
+  /* Wall preview */
+  .wall-wrap{ margin: 24px 0 8px; }
+  .wall{
+    position:relative; width:100%; aspect-ratio:16/9; border-radius:16px; overflow:hidden;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.85)),
+      url('static/images/wall-bg.jpg') center/cover no-repeat;
+    box-shadow: 0 25px 60px rgba(0,0,0,.12) inset, 0 10px 30px rgba(0,0,0,.08);
+  }
+
+  /* Tiles */
+  .tile{
+    position:absolute; left:calc(var(--x)*1%); top:calc(var(--y)*1%); width:calc(var(--w)*1%);
+    border: 2px solid rgba(0,0,0,.55); border-radius:10px; background:#eee; overflow:hidden;
+    box-shadow:0 10px 24px rgba(0,0,0,.14);
+    cursor:grab; user-select:none;
+    transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+  }
+  .tile.square{ aspect-ratio:1/1; }
+  .tile.portrait{ aspect-ratio:2/3; }
+  .tile.landscape{ aspect-ratio:3/2; }
+  .tile.active{ border-color:var(--brand); box-shadow:0 14px 30px rgba(255,123,0,.25); }
+  .tile:active{ cursor:grabbing; }
+
+  .tile-img{
+    position:absolute; inset:0;
+    background-position:center; background-size:cover; background-repeat:no-repeat;
+    transform-origin:center center;
+  }
+  .tile-hint{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    color:#818181; font-weight:600; font-size:.95rem;
+    background: repeating-linear-gradient(45deg,#f7f7f7 0 10px,#f2f2f2 10px 20px);
+    cursor:pointer;
+    outline: none;
+  }
+  .tile-hint:focus{ box-shadow:0 0 0 3px rgba(255,123,0,.35) inset; }
+
+  /* Inspector */
+  .inspector{
+    position:sticky; bottom:0; z-index:3;
+    background:var(--card); border:1px solid rgba(0,0,0,.08); border-radius:12px;
+    box-shadow:0 12px 30px rgba(0,0,0,.08); padding:10px 12px;
+  }
+  .inspector .form-range{ width:180px; }
+  .inspector .meta{ min-width: 92px; font-variant-numeric: tabular-nums; }
+
+  /* Category chooser */
+  .text-brand{ color:var(--brand); }
+  .choice-tile{
+    min-width: 280px; min-height: 120px;
+    border-radius: 18px;
+    border: 2px solid var(--line);
+    background: #fff;
+    font-size: 2rem; font-weight: 700; color: var(--ink);
+    display:flex; align-items:center; justify-content:center;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    outline: none;
+  }
+  .choice-tile:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(0,0,0,.08);
+    border-color:#d7dce5;
+  }
+  .choice-tile:focus{ box-shadow:0 0 0 3px rgba(255,123,0,.35); border-color:var(--brand); }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container py-2 d-flex justify-content-between align-items-center">
+    <!-- Click to open the category picker -->
+    <a id="foxpanelLogo" href="#" class="brand">Fox Panel</a>
+    <div class="d-flex gap-2">
+      <a class="btn btn-sm btn-outline-light" href="index.html">Home</a>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="text-center mt-4 mb-2">
+    <h3 class="fw-bold" style="color:var(--brand)">10+1 Combo — Upload on the Wall</h3>
+    <div class="subtle">Click a tile (or the hint), upload, then drag to pan and use the zoom slider. Change size anytime.</div>
+  </div>
+
+  <!-- Wall -->
+  <div class="wall-wrap">
+    <div id="wall" class="wall" aria-label="Wall preview for 10+1 combo"></div>
+  </div>
+
+  <!-- Inspector -->
+  <div class="inspector d-flex flex-wrap align-items-center justify-content-between gap-2">
+    <div class="d-flex align-items-center gap-2">
+      <span class="meta subtle">Tile: <span id="metaIdx">–</span></span>
+
+      <label for="sizeSelect" class="visually-hidden">Size</label>
+      <select id="sizeSelect" class="form-select form-select-sm">
+        <option value="20x20">20×20 cm</option>
+        <option value="20x30">20×30 cm</option>
+        <option value="30x20">30×20 cm</option>
+      </select>
+
+      <label for="zoomRange" class="visually-hidden">Zoom</label>
+      <input id="zoomRange" class="form-range" type="range" min="1" max="3" step="0.01" value="1" />
+
+      <button id="btnUpload" class="btn btn-sm btn-outline-secondary"><i class="bi bi-upload"></i> Upload</button>
+      <button id="btnResetTile" class="btn btn-sm btn-outline-danger" title="Clear selected tile"><i class="bi bi-x-lg"></i></button>
+
+      <input id="fileHidden" type="file" accept="image/*" hidden>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <button id="btnResetAll" class="btn btn-outline-secondary"><i class="bi bi-arrow-counterclockwise"></i> Reset all</button>
+      <button id="btnDone" class="btn btn-brand">Done</button>
+    </div>
+  </div>
+
+  <div class="small subtle mt-2">
+    Tip: On desktop, you can zoom with the mouse wheel (&nbsp;<span class="kbd">Ctrl</span> + wheel for browser zoom&nbsp;). On mobile, use the slider.
+  </div>
+</main>
+
+<!-- Select Category Modal -->
+<div class="modal fade" id="categoryPicker" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content rounded-4 border-0">
+      <div class="modal-header border-0">
+        <h4 class="modal-title fw-bold text-brand mb-0">Select Category</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body pt-0">
+        <div class="d-flex flex-wrap gap-4 justify-content-center py-2">
+          <button id="chooseCombo" class="choice-tile" tabindex="0" aria-label="Choose 10+1 Combo">10+1 Combo</button>
+          <button id="chooseSingle" class="choice-tile" tabindex="0" aria-label="Choose Single Frame">Single Frame</button>
+        </div>
+      </div>
+
+      <div class="modal-footer border-0">
+        <small class="text-muted">Borderless glossy panels · easy & fast</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  /* === Paths (change if your filenames differ) === */
+  const PATH_COMBO  = location.pathname;              // stay on this page for 10+1 combo
+  const PATH_SINGLE = 'single-frame-multi.html';      // your single-frame page
+
+  /* === Pickers & header === */
+  const categoryPicker = new bootstrap.Modal(document.getElementById('categoryPicker'));
+
+  const openPicker = (e) => { e?.preventDefault(); categoryPicker.show(); };
+  document.getElementById('foxpanelLogo')?.addEventListener('click', openPicker);
+
+  const toCombo  = () => { categoryPicker.hide(); /* already on combo page */ };
+  const toSingle = () => { window.location.href = PATH_SINGLE; };
+
+  const comboBtn  = document.getElementById('chooseCombo');
+  const singleBtn = document.getElementById('chooseSingle');
+
+  comboBtn?.addEventListener('click', toCombo);
+  singleBtn?.addEventListener('click', toSingle);
+
+  // keyboard support for tiles
+  [comboBtn, singleBtn].forEach(btn => {
+    btn?.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); btn.click(); }
+    });
+  });
+
+  /* ========= State for wall ========= */
+  const FRAME_FILES = new Map();   // index -> File
+  const FRAME_SIZES = new Map();   // index -> '20x20'|'20x30'|'30x20'
+  const TILE_STATE  = new Map();   // index -> {scale, offX, offY}
+  let ACTIVE = null;
+
+  /* ========= Layout (11 tiles) ========= */
+  const WALL_LAYOUT = [
+  // 3 portraits (20x30)
+  { i: 1,  type: 'portrait', x:  6, y: 48, w: 10 },
+  { i: 5,  type: 'portrait', x: 42, y: 38, w: 10 },
+  { i: 9,  type: 'portrait', x: 54, y: 58, w: 10 },
+
+  // 8 squares (20x20)
+  { i: 2,  type: 'square',   x: 18, y: 38, w: 11 },
+  { i: 3,  type: 'square',   x: 30, y: 31, w: 11 },
+  { i: 4,  type: 'square',   x: 65, y: 51, w: 11 },
+  { i: 6,  type: 'square',   x: 30, y: 51, w: 11 },
+  { i: 7,  type: 'square',   x: 53, y: 38, w: 11 },
+  { i: 8,  type: 'square',   x: 18, y: 58, w: 11 },
+  { i: 10, type: 'square',   x: 30, y: 71, w: 11 },
+  { i: 11, type: 'square',   x: 42, y: 66, w: 11 },
+];
+
+
+  /* ========= Helpers ========= */
+  const $ = (sel) => document.querySelector(sel);
+  const make = (t,c) => { const e=document.createElement(t); if(c) e.className=c; return e; };
+
+  function setActive(id){
+    if (ACTIVE === id) return;
+    document.querySelectorAll('.tile').forEach(t => t.classList.toggle('active', +t.dataset.idx === id));
+    ACTIVE = id;
+    updateInspectorFromTile(id);
+  }
+  function updateInspectorFromTile(id){
+    $('#metaIdx').textContent = id ? String(id).padStart(2,'0') : '–';
+    const size = FRAME_SIZES.get(id) || '20x20';
+    $('#sizeSelect').value = size;
+    const st = TILE_STATE.get(id) || {scale:1,offX:0,offY:0};
+    $('#zoomRange').value = st.scale || 1;
+  }
+
+  /* ========= Build wall ========= */
+  function buildWall(){
+    const wall = $('#wall');
+    if (!wall) return;
+    wall.innerHTML = '';
+    for (const t of WALL_LAYOUT){
+      const tile = make('div', `tile ${t.type}`);
+      tile.style.setProperty('--x', t.x);
+      tile.style.setProperty('--y', t.y);
+      tile.style.setProperty('--w', t.w);
+      tile.style.zIndex = String(1000 + Math.round(t.y * 10));
+      tile.dataset.idx = t.i;
+
+      const hint = make('div','tile-hint'); 
+      hint.textContent = 'Click to upload';
+      hint.setAttribute('tabindex','0');
+      hint.setAttribute('aria-label','Click to upload image');
+
+      const img  = make('div','tile-img');
+
+      tile.append(hint, img);
+      wall.appendChild(tile);
+
+      TILE_STATE.set(t.i, {scale:1, offX:0, offY:0});
+      FRAME_SIZES.set(t.i, t.type === 'portrait' ? '20x30' : '20x20');
+
+      // click tile → select and, if empty, open picker
+      tile.addEventListener('click', ()=>{
+        setActive(t.i);
+        if (!img.style.backgroundImage) $('#fileHidden').click();
+      });
+
+      // hint click & keyboard
+      const openUpload = (ev)=>{
+        ev.stopPropagation();
+        setActive(t.i);
+        $('#fileHidden').click();
+      };
+      hint.addEventListener('click', openUpload);
+      hint.addEventListener('keydown', (ev)=>{
+        if (ev.key === 'Enter' || ev.key === ' ') openUpload(ev);
+      });
+
+      // Drag to pan
+      let dragging=false, sx=0, sy=0, ox=0, oy=0;
+      tile.addEventListener('pointerdown', ev=>{
+        if (!img.style.backgroundImage) return;
+        dragging = true; tile.setPointerCapture(ev.pointerId);
+        sx = ev.clientX; sy = ev.clientY;
+        const st = TILE_STATE.get(t.i);
+        ox = st.offX; oy = st.offY;
+        setActive(t.i);
+      });
+      tile.addEventListener('pointermove', ev=>{
+        if (!dragging) return;
+        const st = TILE_STATE.get(t.i);
+        st.offX = ox + (ev.clientX - sx);
+        st.offY = oy + (ev.clientY - sy);
+        applyTransform(img, st);
+      });
+      ['pointerup','pointerleave','pointercancel'].forEach(evt =>
+        tile.addEventListener(evt, ()=> dragging=false));
+
+      // Wheel zoom (desktop)
+      tile.addEventListener('wheel', ev=>{
+        if (!img.style.backgroundImage) return;
+        ev.preventDefault();
+        const st = TILE_STATE.get(t.i);
+        const delta = -Math.sign(ev.deltaY) * 0.08;
+        st.scale = Math.min(3, Math.max(1, (st.scale || 1) + delta));
+        $('#zoomRange').value = st.scale;
+        applyTransform(img, st);
+      }, {passive:false});
+    }
+  }
+
+  /* ========= File -> Set image ========= */
+  function setTileImage(idx, file){
+    const tile = document.querySelector(`.tile[data-idx="${idx}"]`);
+    if (!tile) return;
+    const img = tile.querySelector('.tile-img');
+    const hint = tile.querySelector('.tile-hint');
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+      img.style.backgroundImage = `url('${ev.target.result}')`;
+      hint.style.display = 'none';
+      const st = TILE_STATE.get(idx) || {scale:1,offX:0,offY:0};
+      st.scale = 1; st.offX = 0; st.offY = 0;
+      TILE_STATE.set(idx, st);
+      applyTransform(img, st);
+      FRAME_FILES.set(idx, file);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /* ========= Transform ========= */
+  function applyTransform(el, st){
+    el.style.transform = `translate(${st.offX}px, ${st.offY}px) scale(${st.scale})`;
+  }
+
+  /* ========= Rendering ========= */
+  async function renderTileToBlob(idx){
+    const tile = document.querySelector(`.tile[data-idx="${idx}"]`);
+    const file = FRAME_FILES.get(idx);
+    const sizeLbl = FRAME_SIZES.get(idx) || '20x20';
+    if (!tile || !file) return null;
+
+    const bmp = await createImageBitmap(file);
+
+    const ar = (sizeLbl==='20x20') ? 1 : (sizeLbl==='20x30') ? (2/3) : (3/2);
+    const base = 1400;
+    const outW = (ar >= 1) ? base : Math.round(base * ar);
+    const outH = (ar >= 1) ? Math.round(base / ar) : base;
+
+    const out = document.createElement('canvas');
+    out.width = outW; out.height = outH;
+    const ctx = out.getContext('2d', {alpha:false});
+    ctx.imageSmoothingQuality = 'high';
+
+    const st = TILE_STATE.get(idx) || {scale:1,offX:0,offY:0};
+    const r = tile.getBoundingClientRect();
+    const sx = (st.offX || 0) * (outW / r.width);
+    const sy = (st.offY || 0) * (outH / r.height);
+
+    const coverScale = Math.max(outW / bmp.width, outH / bmp.height);
+    ctx.setTransform(coverScale * (st.scale||1), 0, 0, coverScale * (st.scale||1), outW/2 + sx, outH/2 + sy);
+    ctx.drawImage(bmp, -bmp.width/2, -bmp.height/2);
+
+    return new Promise(resolve=>{
+      out.toBlob(b => resolve({ blob:b, name:`frame_${String(idx).padStart(2,'0')}_${sizeLbl}.jpg` }), 'image/jpeg', .92);
+    });
+  }
+  const blobToDataURL = (blob) => new Promise(res => { const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(blob); });
+
+  /* ========= UI Wiring ========= */
+  buildWall();
+  setActive(WALL_LAYOUT[0].i); // default select first tile
+
+  $('#btnUpload')?.addEventListener('click', ()=> $('#fileHidden').click());
+  $('#fileHidden')?.addEventListener('change', (e)=>{
+    const f = e.target.files && e.target.files[0];
+    if (f && ACTIVE) setTileImage(ACTIVE, f);
+    e.target.value = '';
+  });
+
+  $('#sizeSelect')?.addEventListener('change', ()=>{
+    if (!ACTIVE) return;
+    const val = $('#sizeSelect').value;
+    FRAME_SIZES.set(ACTIVE, val);
+    const tile = document.querySelector(`.tile[data-idx="${ACTIVE}"]`);
+    tile?.classList.remove('square','portrait','landscape');
+    tile?.classList.add(val==='20x20' ? 'square' : (val==='20x30' ? 'portrait' : 'landscape'));
+  });
+
+  $('#zoomRange')?.addEventListener('input', ()=>{
+    if (!ACTIVE) return;
+    const st = TILE_STATE.get(ACTIVE) || {scale:1,offX:0,offY:0};
+    st.scale = parseFloat($('#zoomRange').value);
+    TILE_STATE.set(ACTIVE, st);
+    const tile = document.querySelector(`.tile[data-idx="${ACTIVE}"]`);
+    tile && applyTransform(tile.querySelector('.tile-img'), st);
+  });
+
+  $('#btnResetTile')?.addEventListener('click', ()=>{
+    if (!ACTIVE) return;
+    FRAME_FILES.delete(ACTIVE);
+    const tile = document.querySelector(`.tile[data-idx="${ACTIVE}"]`);
+    if (!tile) return;
+    tile.querySelector('.tile-img').style.backgroundImage = '';
+    tile.querySelector('.tile-hint').style.display = '';
+    const st = {scale:1,offX:0,offY:0};
+    TILE_STATE.set(ACTIVE, st);
+    $('#zoomRange').value = 1;
+  });
+
+  $('#btnResetAll')?.addEventListener('click', ()=>{
+    document.querySelectorAll('.tile').forEach(tile=>{
+      tile.querySelector('.tile-img').style.backgroundImage = '';
+      tile.querySelector('.tile-hint').style.display = '';
+    });
+    FRAME_FILES.clear();
+    TILE_STATE.clear();
+    WALL_LAYOUT.forEach(t => TILE_STATE.set(t.i, {scale:1,offX:0,offY:0}));
+    $('#zoomRange').value = 1;
+  });
+
+  $('#btnDone')?.addEventListener('click', async ()=>{
+    const items = [];
+    for (const t of WALL_LAYOUT){
+      if (!FRAME_FILES.get(t.i)) continue;
+      const out = await renderTileToBlob(t.i);
+      if (!out) continue;
+      const dataUrl = await blobToDataURL(out.blob);
+      items.push({ idx:t.i, size:FRAME_SIZES.get(t.i) || '20x20', name:out.name, dataUrl });
+    }
+    if (!items.length){ alert('Please upload at least one photo.'); return; }
+    sessionStorage.setItem('comboCart', JSON.stringify(items));
+    sessionStorage.setItem('comboTotal', '100'); // AED 100 fixed for 10+1
+    window.location.href = 'cart-combo.html';
+  });
+});
+</script>
+</body>
+</html>

@@ -34,30 +34,28 @@
     background:#f3f3f3;
     border-radius: .5rem;
   }
+
   /* printed border (frame) */
   .frame-preview::before{
     content:""; position:absolute; inset:0; border-radius:.5rem;
     border: 16px solid var(--frame-brown); /* default */
     pointer-events:none;
     box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+    z-index: 3; /* stay above image */
   }
   .frame-black::before{ border-color: var(--frame-black); }
   .frame-brown::before{ border-color: var(--frame-brown); }
   .frame-wood::before{  border-color: var(--frame-wood);  }
-  .frame-noborder::before{ border-width:0; }
-
-  /* inner border (mat) */
-  .inner-border-1::after,
-  .inner-border-2::after{
-    content:""; position:absolute; inset: 22px;
-    border-radius:.3rem; background:#fff; pointer-events:none;
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);
+  .frame-noborder::before{
+    border-width:0 !important;
+    box-shadow:none !important;
   }
-  .inner-border-2::after{ inset: 34px; }
 
-  .img-area{ position:absolute; inset: 18px; border-radius:.35rem; overflow:hidden; }
-  .inner-border-1 .img-area{ inset: 30px; }
-  .inner-border-2 .img-area{ inset: 42px; }
+  /* Image area */
+  .img-area{
+    position:absolute; inset: 18px; border-radius:.35rem; overflow:hidden;
+    z-index:2; /* above background */
+  }
   .img-layer{
     position:absolute; inset:0;
     background-position:center; background-repeat:no-repeat; background-size:cover;
@@ -68,6 +66,8 @@
 
   .upload-hint{
     position:absolute; inset:0;
+    z-index: 4;                      /* make it receive clicks */
+    cursor: pointer;                 /* indicate clickability */
     display:flex; align-items:center; justify-content:center;
     color:#8a8a8a; font-weight:600; font-size:.95rem;
     background: repeating-linear-gradient(45deg, #f7f7f7 0 10px, #f3f3f3 10px 20px);
@@ -108,9 +108,7 @@
     </div>
   </div>
 
-  <div id="sfList" class="sf-list row g-4">
-    <!-- cards will be injected here -->
-  </div>
+  <div id="sfList" class="sf-list row g-4"></div>
 </main>
 
 <!-- Cart Modal -->
@@ -142,19 +140,17 @@
   const getPrice = (size) => (size === '20x20' ? 10 : 15); // AED
 
   // State maps: id -> file/options for editor cards
-  const FRAMES = new Map(); // id -> {file, size, printed, inner, scale, offX, offY, price}
+  const FRAMES = new Map(); // id -> {file, size, printed, scale, offX, offY, price}
 
-  // Simple cart store (array of items)
-  // item: { id, name, size, printed, inner, price, url (thumb), blob }
+  // Simple cart
   const CART = [];
 
-  // Utilities
   const el = (t,c='') => { const e=document.createElement(t); if(c) e.className=c; return e; };
 
   const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
   document.getElementById('openCart').addEventListener('click', ()=> cartModal.show());
 
-  // Add first card on load
+  // First card
   addCard();
 
   document.getElementById('addFrame').addEventListener('click', ()=> addCard());
@@ -171,7 +167,6 @@
     alert('All previews downloaded.');
   });
 
-  // ---- Card factory
   function addCard(){
     const id = crypto.randomUUID ? crypto.randomUUID() : ('id_'+Date.now()+Math.random());
     const list = document.getElementById('sfList');
@@ -181,9 +176,10 @@
     const card = el('div','sf-card');
 
     // PREVIEW
-    const preview = el('div','frame-preview frame-brown');
+    const preview = el('div','frame-preview frame-brown'); // default brown
     preview.dataset.id = id;
     const hint = el('div','upload-hint'); hint.textContent='Click to upload';
+    hint.tabIndex = 0; // allow keyboard
     const imgArea = el('div','img-area');
     const layer = el('div','img-layer');
     imgArea.appendChild(layer);
@@ -201,9 +197,9 @@
     const zoomLabel = el('label','form-label mb-1'); zoomLabel.textContent='Pan / Zoom:';
     const zoom = el('input','form-range mb-3'); zoom.type='range'; zoom.min='1'; zoom.max='3'; zoom.step='0.01'; zoom.value='1';
 
-    // CONTROLS
+    // CONTROLS (size + printed border only)
     const controls = el('div','d-flex flex-wrap control-row');
-    const sizeWrap = el('div'); const printedWrap = el('div'); const innerWrap = el('div');
+    const sizeWrap = el('div'); const printedWrap = el('div');
 
     sizeWrap.innerHTML = `
       <label class="form-label small mb-1">Size</label>
@@ -222,15 +218,7 @@
         <option value="none">No Border</option>
       </select>
     `;
-    innerWrap.innerHTML = `
-      <label class="form-label small mb-1">Inner border</label>
-      <select class="form-select form-select-sm sf-inner">
-        <option value="0" selected>No inner border</option>
-        <option value="1">1 cm inner border</option>
-        <option value="2">2 cm inner border</option>
-      </select>
-    `;
-    controls.append(sizeWrap, printedWrap, innerWrap);
+    controls.append(sizeWrap, printedWrap);
 
     // ACTIONS
     const price = el('div','fw-semibold');
@@ -239,27 +227,42 @@
     const btnRemove = el('button','btn btn-outline-danger'); btnRemove.textContent = 'Remove';
     const actions = el('div','sf-actions d-flex flex-wrap justify-content-between align-items-center mt-3');
     const buttons = el('div','sf-btns d-flex flex-wrap gap-2');
-
     buttons.append(btnDownload, btnAdd, btnRemove);
     actions.append(price, buttons);
 
-    // Assemble card
+    // Build card
     card.append(preview, zoomLabel, zoom, controls, actions);
     col.appendChild(card);
     list.prepend(col);
 
-    // ---- State init + initial price
+    // State init
     const initSize = '20x20';
     const initPrice = getPrice(initSize);
-    FRAMES.set(id, { file:null, size:initSize, printed:'brown', inner:'0', scale:1, offX:0, offY:0, price:initPrice });
+    FRAMES.set(id, { file:null, size:initSize, printed:'brown', scale:1, offX:0, offY:0, price:initPrice });
     price.textContent = `Price : AED ${initPrice}`;
 
-    // --- Event wiring per card
+    // ====== UPLOAD OPENING (fixed) ======
+    // 1) Button
     pickBtn.addEventListener('click', ()=> file.click());
+
+    // 2) Anywhere in the preview except the upload button itself
     preview.addEventListener('click', (e)=>{
-      if (e.target === preview || e.target === imgArea) file.click();
+      if (e.target === pickBtn) return;
+      file.click();
     });
 
+    // 3) Explicit overlay + keyboard
+    hint.addEventListener('click', (e)=>{ e.stopPropagation(); file.click(); });
+    hint.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); file.click(); }
+    });
+
+    // (Optional) clicking inside image area also opens picker when empty
+    imgArea.addEventListener('click', (e)=>{
+      if (!layer.style.backgroundImage) { e.stopPropagation(); file.click(); }
+    });
+
+    // ====== File load ======
     file.addEventListener('change', (e)=>{
       const f = e.target.files && e.target.files[0];
       if(!f) return;
@@ -276,6 +279,7 @@
       e.target.value='';
     });
 
+    // Zoom
     zoom.addEventListener('input', ()=>{
       const state = FRAMES.get(id);
       state.scale = parseFloat(zoom.value);
@@ -300,10 +304,9 @@
     ['pointerup','pointerleave','pointercancel'].forEach(evt =>
       imgArea.addEventListener(evt, ()=> drag=false));
 
-    // Size / Printed / Inner
+    // Size / Printed border
     const sizeSel = sizeWrap.querySelector('.sf-size');
     const printedSel = printedWrap.querySelector('.sf-printed');
-    const innerSel = innerWrap.querySelector('.sf-inner');
 
     sizeSel.addEventListener('change', ()=>{
       const st = FRAMES.get(id);
@@ -321,12 +324,6 @@
     });
     setPrintedClass(preview, 'brown');
 
-    innerSel.addEventListener('change', ()=>{
-      FRAMES.get(id).inner = innerSel.value;
-      setInnerClass(preview, innerSel.value);
-    });
-    setInnerClass(preview, '0');
-
     // Actions
     btnDownload.addEventListener('click', async ()=>{
       const st = FRAMES.get(id);
@@ -338,8 +335,6 @@
     btnAdd.addEventListener('click', async ()=>{
       const st = FRAMES.get(id);
       if (!st.file){ alert('Upload a photo first.'); return; }
-
-      // Render final image, create a temporary URL for thumbnail/display
       const out = await renderCardToBlob(id);
       const url = URL.createObjectURL(out.blob);
 
@@ -348,10 +343,9 @@
         name: out.name,
         size: st.size,
         printed: st.printed,
-        inner: st.inner,
         price: st.price,
-        url,            // object URL for <img>
-        blob: out.blob  // original blob (if you want to upload later)
+        url,
+        blob: out.blob
       });
 
       refreshCartUI();
@@ -373,20 +367,14 @@
     if (v==='black') preview.classList.add('frame-black');
     else if (v==='brown') preview.classList.add('frame-brown');
     else if (v==='wood') preview.classList.add('frame-wood');
-    else preview.classList.add('frame-noborder');
+    else preview.classList.add('frame-noborder'); /* no frame at all */
   }
 
-  function setInnerClass(preview, v){
-    preview.classList.remove('inner-border-0','inner-border-1','inner-border-2');
-    preview.classList.add('inner-border-' + v);
-  }
-
-  // Render one card to final cropped image (local)
+  // Render one card to final cropped image
   async function renderCardToBlob(id){
     const col = document.querySelector(`[data-id="${id}"]`);
     const preview = col.querySelector('.frame-preview');
     const imgArea = preview.querySelector('.img-area');
-    const layer = preview.querySelector('.img-layer');
     const st = FRAMES.get(id);
     const file = st.file;
 
@@ -441,8 +429,7 @@
         meta.innerHTML = `
           <div class="small text-muted">${item.name}</div>
           <div><span class="badge text-bg-light">${item.size}</span>
-               <span class="badge text-bg-light">Frame: ${item.printed}</span>
-               <span class="badge text-bg-light">Inner: ${item.inner}</span></div>
+               <span class="badge text-bg-light">Frame: ${item.printed}</span></div>
         `;
         left.append(img, meta);
 
@@ -450,7 +437,6 @@
         const price = el('div','fw-semibold'); price.textContent = `AED ${item.price}`;
         const rm = el('button','btn btn-sm btn-outline-danger'); rm.innerHTML = '<i class="bi bi-x"></i>';
         rm.addEventListener('click', ()=>{
-          // revoke URL to free memory
           URL.revokeObjectURL(item.url);
           const idx = CART.findIndex(x => x.id === item.id);
           if (idx>-1) CART.splice(idx,1);
@@ -468,7 +454,6 @@
     totalEl.textContent = total.toFixed(2);
     countEl.textContent = CART.length;
 
-    // Clear / checkout handlers (bind once safely)
     document.getElementById('clearCart').onclick = ()=>{
       CART.forEach(it => URL.revokeObjectURL(it.url));
       CART.length = 0;
@@ -479,7 +464,6 @@
       if (!CART.length) return;
       const ok = confirm(`Confirm payment of AED ${total.toFixed(2)} for ${CART.length} item(s)?`);
       if (ok){
-        // simulate success
         alert('Payment successful (demo). Order placed!');
         CART.forEach(it => URL.revokeObjectURL(it.url));
         CART.length = 0;
