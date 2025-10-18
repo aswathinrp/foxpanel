@@ -405,3 +405,113 @@
 .tile.square    { aspect-ratio: 1/1; }
 .tile.portrait  { aspect-ratio: 2/3; }
 .tile.landscape { aspect-ratio: 3/2; }
+/* Equal-height option cards */
+.option-card{
+  display:flex;            /* stack image + title */
+  flex-direction:column;
+  border-radius:16px;
+  background:#fff;
+  box-shadow:0 10px 24px rgba(0,0,0,.06);
+  border:1px solid rgba(0,0,0,.05);
+  text-decoration:none;
+  height:100%;             /* allow stretching to equal height */
+}
+
+/* same-sized media area for all cards */
+.option-thumb{
+  width:100%;
+  aspect-ratio: 16 / 11;   /* <-- pick a ratio you like (16/11 ~ gallery) */
+  overflow:hidden;
+}
+.option-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;        /* crop to fill, no squish */
+  display:block;
+}
+
+/* consistent title bar height */
+.option-title{
+  padding:14px 16px;
+  font-weight:700;
+  color:#0f1216;
+  text-align:center;
+  min-height:56px;         /* same height for all titles */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* printed border (outer frame) — keep as-is, just ensure it's above all */
+.frame-preview::before{
+  content:""; position:absolute; inset:0; border-radius:.5rem;
+  border: 16px solid var(--frame-brown); /* default */
+  pointer-events:none;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+  z-index: 3; /* make sure it sits on top */
+}
+.frame-black::before{ border-color: var(--frame-black); }
+.frame-brown::before{ border-color: var(--frame-brown); }
+.frame-wood::before{  border-color: var(--frame-wood);  }
+.frame-noborder::before{ border-width:0; }
+
+/* inner border (mat) — use borders so the center stays transparent */
+.inner-border-1::after,
+.inner-border-2::after{
+  content:""; position:absolute; inset:0;
+  border-radius:.5rem;
+  pointer-events:none;
+  /* draw a white border (transparent center) */
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);
+  z-index: 2;               /* below printed frame, above background */
+  background: transparent;  /* IMPORTANT: no fill */
+}
+.inner-border-1::after{ border: 12px solid #fff; } /* ~1 cm */
+.inner-border-2::after{ border: 22px solid #fff; } /* ~2 cm */
+
+/* image area and offsets */
+.img-area{ position:absolute; inset: 18px; border-radius:.35rem; overflow:hidden; z-index: 1; }
+.inner-border-1 .img-area{ inset: 30px; } /* move image in to match 1 cm mat */
+.inner-border-2 .img-area{ inset: 42px; } /* move image in to match 2 cm mat */
+/* ===== Replace/augment your existing CSS with these lines ===== */
+
+/* The preview is the stacking context */
+.frame-preview{
+  position: relative;          /* already present, just reaffirming */
+}
+
+/* OUTER printed frame (should be on top) */
+.frame-preview::before{
+  z-index: 3;                  /* sits above mat + image */
+}
+
+/* MAT (inner border) should be below the image */
+.inner-border-1::after,
+.inner-border-2::after{
+  z-index: 1;                  /* put the mat beneath the image */
+}
+
+/* Image layer sits above the mat, below the frame */
+.img-area{
+  position: absolute;
+  inset: 18px;                 /* default for 20x20 with no mat */
+  border-radius: .35rem;
+  overflow: hidden;
+  z-index: 2;                  /* <- key line */
+}
+
+/* keep your existing mat insets */
+.inner-border-1 .img-area{ inset: 30px; }
+.inner-border-2 .img-area{ inset: 42px; }
+/* When user picks "No Border" */
+.frame-noborder::before{
+  border-width: 0 !important;
+  box-shadow: none !important;   /* remove the inner outline */
+}
+.upload-hint{
+  position:absolute; inset:0;
+  z-index: 4;                 /* make sure it’s on top and clickable */
+  display:flex; align-items:center; justify-content:center;
+  color:#8a8a8a; font-weight:600; font-size:.95rem;
+  background: repeating-linear-gradient(45deg, #f7f7f7 0 10px, #f3f3f3 10px 20px);
+}
